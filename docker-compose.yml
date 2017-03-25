@@ -1,28 +1,30 @@
-version: '2'
+version: '3'
 
 services:
     db:
         image: mysql
         volumes:
-            - "./.data/db:/var/lib/mysql"
+            - ./.data/db:/var/lib/mysql
         environment:
             MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
             MYSQL_DATABASE: ${MYSQL_DATABASE}
             MYSQL_USER: ${MYSQL_USER}
             MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     php:
-        build: php7-fpm
+        build: php7.1-fpm
+        depends_on:
+            - db
+            - nginx
         volumes:
-            - ${SYMFONY_APP_PATH}:/var/www/symfony
-            - ./logs/symfony:/var/www/symfony/app/logs
+            - symfony-bind-mount:/var/www/symfony
+            - symfony-logs-bind-mount:/var/www/symfony/app/logs
     nginx:
         build: nginx
         ports:
             - 80:80
-        volumes_from:
-            - php
         volumes:
-            - ./logs/nginx/:/var/log/nginx
+            - symfony-bind-mount:/var/www/symfony
+            - nginx-logs-bind-mount:/var/log/nginx
     elk:
         image: willdurand/elk
         ports:
@@ -30,6 +32,24 @@ services:
         volumes:
             - ./elk/logstash:/etc/logstash
             - ./elk/logstash/patterns:/opt/logstash/patterns
-        volumes_from:
-            - php
-            - nginx
+            - symfony-bind-mount:/var/www/symfony
+            - nginx-logs-bind-mount:/var/log/nginx
+volumes:
+    symfony-bind-mount:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ${SYMFONY_APP_PATH}
+    nginx-logs-bind-mount:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ${DOCKER_SYMFONY_PATH}/logs/nginx
+    symfony-logs-bind-mount:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ${DOCKER_SYMFONY_PATH}/logs/symfony
