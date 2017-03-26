@@ -1,11 +1,13 @@
 # See https://github.com/docker-library/php/blob/4677ca134fe48d20c820a19becb99198824d78e3/7.0/fpm/Dockerfile
 FROM php:7.1-fpm
 
-LABEL maintainer "Maxence POUTORD <maxence.poutord@gmail.com>"
+LABEL author="Christian Elowsky <christian.elowsky@gmail.com>"
 
 RUN apt-get update && apt-get install -y \
     git \
-    unzip
+    unzip \
+    npm \
+    nodejs
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -35,4 +37,10 @@ RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-x
 RUN echo 'alias sf="php app/console"' >> ~/.bashrc
 RUN echo 'alias sf3="php bin/console"' >> ~/.bashrc
 
+COPY ./package.json /var/www/symfony/package.json
+COPY ./gulpfile.js /var/www/symfony/gulpfile.js
 WORKDIR /var/www/symfony
+
+#CMD ["npm", "install", "--env=dev"]
+#CMD npm run build -- --env=dev
+#CMD ["npm", "run-script", "build", " -- ", "--env=dev"]
