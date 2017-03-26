@@ -148,3 +148,9 @@ Just config your IDE to connect port  `9001` and id key `PHPSTORM`
 First of all, **thank you** for contributing ♥  
 If you find any typo/misconfiguration/... please send me a PR or open an issue. You can also ping me on [twitter](https://twitter.com/_maxpou).  
 Also, while creating your Pull Request on GitHub, please write a description which gives the context and/or explains why you are creating it.
+
+### Notes for Christian
+- Make sure to update hosts file
+- Make sure to install composer and npm packages after container builds arecomplete
+- Make sure to run migrations
+- Check that nginx is connected to the php service
