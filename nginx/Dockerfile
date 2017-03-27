@@ -1,15 +1,11 @@
-FROM debian:jessie
+FROM nginx
 
-MAINTAINER Maxence POUTORD <maxence.poutord@gmail.com>
+COPY nginx.conf /etc/nginx/
+COPY symfony.conf /etc/nginx/sites-available/
 
-RUN apt-get update && apt-get install -y \
-    nginx
-
-ADD nginx.conf /etc/nginx/
-ADD symfony.conf /etc/nginx/sites-available/
-
-RUN ln -s /etc/nginx/sites-available/symfony.conf /etc/nginx/sites-enabled/symfony
-RUN rm /etc/nginx/sites-enabled/default
+RUN mkdir -p /etc/nginx/sites-enabled/ \
+    && ln -s /etc/nginx/sites-available/symfony.conf /etc/nginx/sites-enabled/symfony.conf \
+    && rm /etc/nginx/conf.d/default.conf 
 
 RUN echo "upstream php-upstream { server php:9000; }" > /etc/nginx/conf.d/upstream.conf
 
@@ -19,4 +15,3 @@ CMD ["nginx"]
 
 EXPOSE 80
 EXPOSE 443
-EXPOSE 8080
