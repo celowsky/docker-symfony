@@ -2,7 +2,7 @@ version: '3'
 
 services:
     db:
-        image: mysql
+        build: db
         volumes:
             - ./.data/db:/var/lib/mysql
         environment:
@@ -69,4 +69,4 @@ volumes:
         driver_opts:
             o: bind,rw
             type: none
-            device: /home/zyglrox/projects/newSymfonyApp/docker-symfony/doc
+            device: ${DOCKER_SYMFONY_PATH}/doc
