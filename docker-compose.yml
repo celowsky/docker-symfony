@@ -17,7 +17,7 @@ services:
         ports:
             - "9000:9000"
         volumes:
-            - symfony-bind-mount:/var/www/symfony
+            - symfony-bind-mount:/var/www
             - symfony-logs-bind-mount:/var/www/symfony/app/logs
             - mailhog-storage:/var
     nginx:
@@ -28,7 +28,7 @@ services:
             - "8025:8025"
             - "80:80"
         volumes:
-            - symfony-bind-mount:/var/www/symfony
+            - symfony-bind-mount:/var/www
             - nginx-logs-bind-mount:/var/log/nginx
     elk:
         image: willdurand/elk
@@ -37,12 +37,12 @@ services:
         volumes:
             - ./elk/logstash:/etc/logstash
             - ./elk/logstash/patterns:/opt/logstash/patterns
-            - symfony-bind-mount:/var/www/symfony
+            - symfony-bind-mount:/var/www
             - nginx-logs-bind-mount:/var/log/nginx
     mailhog:
         image: mailhog/mailhog
         volumes:
-            - symfony-bind-mount:/var/www/symfony
+            - symfony-bind-mount:/var/www
             - symfony-logs-bind-mount:/var/www/symfony/app/logs
             - mailhog-storage:/var
 volumes:
@@ -69,4 +69,4 @@ volumes:
         driver_opts:
             o: bind,rw
             type: none
-            device: /home/zyglrox/projects/newSymfonyApp/docker-symfony/doc
+            device: ${DOCKER_SYMFONY_PATH}/doc
