@@ -24,7 +24,7 @@ RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebu
 RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.remote_port=9123" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 
 RUN echo 'alias sf="php app/console"' >> ~/.bashrc
@@ -32,8 +32,16 @@ RUN echo 'alias sf3="php bin/console"' >> ~/.bashrc
 
 COPY ./package.json /var/www/symfony/package.json
 COPY ./gulpfile.js /var/www/symfony/gulpfile.js
+COPY ./composer.json /var/www/symfony/composer.json
+
 WORKDIR /var/www/symfony
 
-#CMD ["npm", "install", "--env=dev"]
+EXPOSE 9000
+RUN usermod -u 1000 www-data
+CMD export APP_ENV=dev \
+    && chmod -R 777 var/ \
+    && composer install --no-scripts \
+    && php bin/console d:m:m --no-interaction \
+    && php-fpm
 #CMD npm run build -- --env=dev
 #CMD ["npm", "run-script", "build", " -- ", "--env=dev"]
