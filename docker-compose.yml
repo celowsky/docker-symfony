@@ -20,6 +20,10 @@ services:
             - symfony-bind-mount:/var/www/symfony
             - symfony-logs-bind-mount:/var/www/symfony/app/logs
             - mailhog-storage:/var
+    node:
+        build: node
+        volumes:
+            - symfony-bind-mount:/var/www/symfony
     nginx:
         build: nginx
         depends_on:
