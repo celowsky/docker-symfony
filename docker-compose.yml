@@ -39,6 +39,7 @@ services:
             - symfony-bind-mount:/var/www/symfony
             - nginx-logs-bind-mount:/var/log/nginx
         networks:
+            - auditnet
             - lsnet
     mailhog:
         image: mailhog/mailhog
@@ -68,8 +69,6 @@ services:
         build: auditphp7.1-fpm
         depends_on:
             - auditdb
-        expose:
-            - "80"
         volumes:
             - audit-symfony-bind-mount:/var/www/symfony
             - audit-symfony-logs-bind-mount:/var/www/symfony/app/logs
@@ -79,13 +78,12 @@ services:
         build: auditnginx
         depends_on:
             - auditphp
-        ports:
-            - "8080:80"
         volumes:
             - audit-symfony-bind-mount:/var/www/symfony
             - audit-nginx-logs-bind-mount:/var/log/nginx
         networks:
             - auditnet
+            - lsnet
 networks:
     lsnet:
     auditnet:
