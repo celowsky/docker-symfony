@@ -30,8 +30,6 @@ RUN echo "xdebug.remote_port=9123" >> /usr/local/etc/php/conf.d/docker-php-ext-x
 RUN echo 'alias sf="php app/console"' >> ~/.bashrc
 RUN echo 'alias sf3="php bin/console"' >> ~/.bashrc
 
-COPY ./package.json /var/www/symfony/package.json
-COPY ./gulpfile.js /var/www/symfony/gulpfile.js
 COPY ./composer.json /var/www/symfony/composer.json
 
 WORKDIR /var/www/symfony
