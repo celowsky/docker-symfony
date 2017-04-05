@@ -10,20 +10,24 @@ services:
             MYSQL_DATABASE: ${MYSQL_DATABASE}
             MYSQL_USER: ${MYSQL_USER}
             MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        networks:
+            - lsnet
     php:
         build: php7.1-fpm
         depends_on:
             - db
-        ports:
-            - "9000:9000"
         volumes:
             - symfony-bind-mount:/var/www/symfony
             - symfony-logs-bind-mount:/var/www/symfony/app/logs
             - mailhog-storage:/var
+        networks:
+            - lsnet
     node:
         build: node
         volumes:
             - symfony-bind-mount:/var/www/symfony
+        networks:
+            - lsnet
     nginx:
         build: nginx
         depends_on:
@@ -34,6 +38,8 @@ services:
         volumes:
             - symfony-bind-mount:/var/www/symfony
             - nginx-logs-bind-mount:/var/log/nginx
+        networks:
+            - lsnet
     mailhog:
         image: mailhog/mailhog
         ports:
@@ -43,6 +49,47 @@ services:
             - symfony-bind-mount:/var/www/symfony
             - symfony-logs-bind-mount:/var/www/symfony/app/logs
             - mailhog-storage:/var
+        networks:
+            - lsnet
+
+
+    auditdb:
+        build: auditdb
+        volumes:
+            - ./.data/auditdb:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${AUDIT_MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${AUDIT_MYSQL_DATABASE}
+            MYSQL_USER: ${AUDIT_MYSQL_USER}
+            MYSQL_PASSWORD: ${AUDIT_MYSQL_PASSWORD}
+        networks:
+            - auditnet
+    auditphp:
+        build: auditphp7.1-fpm
+        depends_on:
+            - auditdb
+        expose:
+            - "80"
+        volumes:
+            - audit-symfony-bind-mount:/var/www/symfony
+            - audit-symfony-logs-bind-mount:/var/www/symfony/app/logs
+        networks:
+            - auditnet
+    auditnginx:
+        build: auditnginx
+        depends_on:
+            - auditphp
+        ports:
+            - "8080:80"
+        volumes:
+            - audit-symfony-bind-mount:/var/www/symfony
+            - audit-nginx-logs-bind-mount:/var/log/nginx
+        networks:
+            - auditnet
+networks:
+    lsnet:
+    auditnet:
+
 volumes:
     symfony-bind-mount:
         driver: local
@@ -68,3 +115,21 @@ volumes:
             o: bind,rw
             type: none
             device: ${DOCKER_SYMFONY_PATH}/doc
+    audit-symfony-bind-mount:
+        driver: local
+        driver_opts:
+            o: bind,rw
+            type: none
+            device: ${AUDIT_SYMFONY_APP_PATH}
+    audit-nginx-logs-bind-mount:
+        driver: local
+        driver_opts:
+            o: bind,rw
+            type: none
+            device: ${DOCKER_SYMFONY_PATH}/auditLogs/nginx
+    audit-symfony-logs-bind-mount:
+        driver: local
+        driver_opts:
+            o: bind,rw
+            type: none
+            device: ${DOCKER_SYMFONY_PATH}/auditLogs/symfony
