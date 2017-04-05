@@ -28,23 +28,17 @@ services:
         build: nginx
         depends_on:
             - php
+            - mailhog
         ports:
-            - "8025:8025"
             - "80:80"
         volumes:
             - symfony-bind-mount:/var/www/symfony
             - nginx-logs-bind-mount:/var/log/nginx
-    elk:
-        image: willdurand/elk
-        ports:
-            - "81:80"
-        volumes:
-            - ./elk/logstash:/etc/logstash
-            - ./elk/logstash/patterns:/opt/logstash/patterns
-            - symfony-bind-mount:/var/www/symfony
-            - nginx-logs-bind-mount:/var/log/nginx
     mailhog:
         image: mailhog/mailhog
+        ports:
+            - "1025:1025"
+            - "8025:8025"
         volumes:
             - symfony-bind-mount:/var/www/symfony
             - symfony-logs-bind-mount:/var/www/symfony/app/logs
