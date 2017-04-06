@@ -14,6 +14,8 @@ services:
             - lsnet
     php:
         build: php7.1-fpm
+        expose:
+            - "80"
         depends_on:
             - db
         volumes:
@@ -73,6 +75,7 @@ services:
             - audit-symfony-bind-mount:/var/www/symfony
             - audit-symfony-logs-bind-mount:/var/www/symfony/app/logs
         networks:
+            - lsnet
             - auditnet
     auditnginx:
         build: auditnginx
