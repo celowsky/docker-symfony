@@ -9,37 +9,41 @@ RUN apt-get update && apt-get install -y \
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer --version
 
 # Type docker-php-ext-install to see available extensions
 RUN docker-php-ext-install pdo pdo_mysql
 
 
-# install xdebug
-RUN pecl install xdebug
-RUN docker-php-ext-enable xdebug
-RUN echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "display_startup_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_port=9123" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+# Setup xdebug
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "display_startup_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.remote_port=9123" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini 
 
-
-RUN echo 'alias sf="php app/console"' >> ~/.bashrc
+# Adds bash alias to easily run commands from host e.g. "docker run php sf d:d:d --force"
+RUN echo 'alias sf="php bin/console"' >> ~/.bashrc
 RUN echo 'alias sf3="php bin/console"' >> ~/.bashrc
 
-COPY ./composer.json /var/www/symfony/composer.json
+# Exposes php-fpm service on internal network
+EXPOSE 9000
 
+# Gives the user www-data the same UID as your host's user 
+# Confirm by executing the "id" command in the host:
+RUN usermod -u 1000 www-data
+
+# Copies composer.json from main project to container 
+COPY ./composer.json /var/www/symfony/composer.json
 WORKDIR /var/www/symfony
 
-EXPOSE 9000
-RUN usermod -u 1000 www-data
+# Makes sure environment is set so app/AppKernel.php does not fail
+# and makes sure cache directory permissions are very relaxed
 CMD export APP_ENV=dev \
     && chmod -R 777 var/ \
     && composer install --no-scripts \
     && php bin/console d:m:m --no-interaction \
     && php-fpm
-#CMD npm run build -- --env=dev
-#CMD ["npm", "run-script", "build", " -- ", "--env=dev"]

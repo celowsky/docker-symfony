@@ -15,6 +15,7 @@ services:
     php:
         build: php7.1-fpm
         expose:
+            - "9000"
             - "80"
         depends_on:
             - db
@@ -41,7 +42,6 @@ services:
             - symfony-bind-mount:/var/www/symfony
             - nginx-logs-bind-mount:/var/log/nginx
         networks:
-            - auditnet
             - lsnet
     mailhog:
         image: mailhog/mailhog
@@ -49,8 +49,6 @@ services:
             - "1025:1025"
             - "8025:8025"
         volumes:
-            - symfony-bind-mount:/var/www/symfony
-            - symfony-logs-bind-mount:/var/www/symfony/app/logs
             - mailhog-storage:/var
         networks:
             - lsnet
@@ -75,7 +73,6 @@ services:
             - audit-symfony-bind-mount:/var/www/symfony
             - audit-symfony-logs-bind-mount:/var/www/symfony/app/logs
         networks:
-            - lsnet
             - auditnet
     auditnginx:
         build: auditnginx
@@ -86,7 +83,6 @@ services:
             - audit-nginx-logs-bind-mount:/var/log/nginx
         networks:
             - auditnet
-            - lsnet
 networks:
     lsnet:
     auditnet:
@@ -127,10 +123,10 @@ volumes:
         driver_opts:
             o: bind,rw
             type: none
-            device: ${DOCKER_SYMFONY_PATH}/auditLogs/nginx
+            device: ${DOCKER_SYMFONY_PATH}/logs/auditnginx
     audit-symfony-logs-bind-mount:
         driver: local
         driver_opts:
             o: bind,rw
             type: none
-            device: ${DOCKER_SYMFONY_PATH}/auditLogs/symfony
+            device: ${DOCKER_SYMFONY_PATH}/logs/auditphp
