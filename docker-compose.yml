@@ -1,4 +1,4 @@
-version: '3'
+version: '3.2'
 
 services:
     db:
@@ -19,10 +19,12 @@ services:
             - "80"
         depends_on:
             - db
+        extra_hosts:
+            - "legacyshield.dev:${APP_IP_ADDRESS}"
+            - "www.legacyshield.dev:${APP_IP_ADDRESS}"
         volumes:
             - symfony-bind-mount:/var/www/symfony
             - symfony-logs-bind-mount:/var/www/symfony/app/logs
-            - mailhog-storage:/var
         networks:
             - lsnet
     node:
@@ -35,14 +37,15 @@ services:
         build: nginx
         depends_on:
             - php
-            - mailhog
         ports:
             - "80:80"
         volumes:
             - symfony-bind-mount:/var/www/symfony
             - nginx-logs-bind-mount:/var/log/nginx
         networks:
-            - lsnet
+            lsnet:
+                ipv4_address: ${APP_IP_ADDRESS}
+
     mailhog:
         image: mailhog/mailhog
         ports:
@@ -82,10 +85,18 @@ services:
             - audit-symfony-bind-mount:/var/www/symfony
             - audit-nginx-logs-bind-mount:/var/log/nginx
         networks:
-            - auditnet
+            auditnet:
+                ipv4_address: ${AUDIT_IP_ADDRESS}
+
 networks:
     lsnet:
+        ipam:
+            config:
+                - subnet: 172.18.0.0/24
     auditnet:
+        ipam:
+            config:
+                - subnet: 172.19.0.0/24
 
 volumes:
     symfony-bind-mount:
