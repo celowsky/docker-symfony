@@ -43,7 +43,6 @@ WORKDIR /var/www/symfony
 # Makes sure environment is set so app/AppKernel.php does not fail
 # and makes sure cache directory permissions are very relaxed
 CMD export APP_ENV=dev \
+    && export COMPOSER_PROCESSOR_TIMEOUT=600 \
     && chmod -R 777 var/ \
-    && composer install --no-scripts \
-    && php bin/console d:m:m --no-interaction \
     && php-fpm

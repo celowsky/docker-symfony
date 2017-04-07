@@ -1,4 +1,4 @@
-FROM nginx
+FROM nginx:1.11
 
 COPY nginx.conf /etc/nginx/
 COPY audit.conf /etc/nginx/sites-available/
