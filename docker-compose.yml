@@ -20,15 +20,15 @@ services:
         depends_on:
             - db
         volumes:
-            - symfony-bind-mount:/var/www/symfony
-            - symfony-logs-bind-mount:/var/www/symfony/app/logs
-            - mailhog-storage:/var
+            - C:\Users\chris\Projects\legacyshield2\legacyshield:/var/www/symfony
+            - C:\Users\chris\Projects\legacyshield2\docker-symfony\logs\symfony:/var/www/symfony/app/logs
+            - ./var:/var
         networks:
             - lsnet
     node:
         build: node
         volumes:
-            - symfony-bind-mount:/var/www/symfony
+            - C:\Users\chris\Projects\legacyshield2\legacyshield:/var/www/symfony
         networks:
             - lsnet
     nginx:
@@ -39,8 +39,8 @@ services:
         ports:
             - "80:80"
         volumes:
-            - symfony-bind-mount:/var/www/symfony
-            - nginx-logs-bind-mount:/var/log/nginx
+            - C:\Users\chris\Projects\legacyshield2\legacyshield:/var/www/symfony
+            - C:\Users\chris\Projects\legacyshield2\docker-symfony\logs\nginx:/var/log/nginx
         networks:
             - lsnet
     mailhog:
@@ -49,7 +49,7 @@ services:
             - "1025:1025"
             - "8025:8025"
         volumes:
-            - mailhog-storage:/var
+            - ./var:/var
         networks:
             - lsnet
 
@@ -70,8 +70,8 @@ services:
         depends_on:
             - auditdb
         volumes:
-            - audit-symfony-bind-mount:/var/www/symfony
-            - audit-symfony-logs-bind-mount:/var/www/symfony/app/logs
+            - C:\Users\chris\Projects\legacyshield2\legacyshieldaudit:/var/www/symfony
+            - C:\Users\chris\Projects\legacyshield2\docker-symfony\logs\auditphp:/var/www/symfony/app/logs
         networks:
             - auditnet
     auditnginx:
@@ -79,54 +79,10 @@ services:
         depends_on:
             - auditphp
         volumes:
-            - audit-symfony-bind-mount:/var/www/symfony
-            - audit-nginx-logs-bind-mount:/var/log/nginx
+            - C:\Users\chris\Projects\legacyshield2\legacyshieldaudit:/var/www/symfony
+            - C:\Users\chris\Projects\legacyshield2\docker-symfony\logs\auditnginx:/var/log/nginx
         networks:
             - auditnet
 networks:
     lsnet:
     auditnet:
-
-volumes:
-    symfony-bind-mount:
-        driver: local
-        driver_opts:
-            o: bind,rw
-            type: none
-            device: ${SYMFONY_APP_PATH}
-    nginx-logs-bind-mount:
-        driver: local
-        driver_opts:
-            o: bind,rw
-            type: none
-            device: ${DOCKER_SYMFONY_PATH}/logs/nginx
-    symfony-logs-bind-mount:
-        driver: local
-        driver_opts:
-            o: bind,rw
-            type: none
-            device: ${DOCKER_SYMFONY_PATH}/logs/symfony
-    mailhog-storage:
-        driver: local
-        driver_opts:
-            o: bind,rw
-            type: none
-            device: ${DOCKER_SYMFONY_PATH}/doc
-    audit-symfony-bind-mount:
-        driver: local
-        driver_opts:
-            o: bind,rw
-            type: none
-            device: ${AUDIT_SYMFONY_APP_PATH}
-    audit-nginx-logs-bind-mount:
-        driver: local
-        driver_opts:
-            o: bind,rw
-            type: none
-            device: ${DOCKER_SYMFONY_PATH}/logs/auditnginx
-    audit-symfony-logs-bind-mount:
-        driver: local
-        driver_opts:
-            o: bind,rw
-            type: none
-            device: ${DOCKER_SYMFONY_PATH}/logs/auditphp
