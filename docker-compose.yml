@@ -1,8 +1,8 @@
-version: '3'
+version: '3.2'
 
 services:
     db:
-        image: mysql
+        build: db
         volumes:
             - ./.data/db:/var/lib/mysql
         environment:
@@ -10,41 +10,94 @@ services:
             MYSQL_DATABASE: ${MYSQL_DATABASE}
             MYSQL_USER: ${MYSQL_USER}
             MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        networks:
+            - lsnet
     php:
         build: php7.1-fpm
+        expose:
+            - "9000"
+            - "80"
         depends_on:
             - db
-        ports:
-            - "9000:9000"
+        extra_hosts:
+            - "legacyshield.dev:${APP_IP_ADDRESS}"
+            - "www.legacyshield.dev:${APP_IP_ADDRESS}"
         volumes:
             - symfony-bind-mount:/var/www
             - symfony-logs-bind-mount:/var/www/symfony/app/logs
-            - mailhog-storage:/var
+        networks:
+            - lsnet
+    node:
+        build: node
+        volumes:
+            - symfony-bind-mount:/var/www/symfony
+        networks:
+            - lsnet
     nginx:
         build: nginx
         depends_on:
             - php
         ports:
-            - "8025:8025"
             - "80:80"
         volumes:
             - symfony-bind-mount:/var/www
             - nginx-logs-bind-mount:/var/log/nginx
-    elk:
-        image: willdurand/elk
-        ports:
-            - "81:80"
-        volumes:
-            - ./elk/logstash:/etc/logstash
-            - ./elk/logstash/patterns:/opt/logstash/patterns
-            - symfony-bind-mount:/var/www
-            - nginx-logs-bind-mount:/var/log/nginx
+        networks:
+            lsnet:
+                ipv4_address: ${APP_IP_ADDRESS}
+
     mailhog:
         image: mailhog/mailhog
+        ports:
+            - "1025:1025"
+            - "8025:8025"
         volumes:
-            - symfony-bind-mount:/var/www
-            - symfony-logs-bind-mount:/var/www/symfony/app/logs
             - mailhog-storage:/var
+        networks:
+            - lsnet
+
+
+    auditdb:
+        build: auditdb
+        volumes:
+            - ./.data/auditdb:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${AUDIT_MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${AUDIT_MYSQL_DATABASE}
+            MYSQL_USER: ${AUDIT_MYSQL_USER}
+            MYSQL_PASSWORD: ${AUDIT_MYSQL_PASSWORD}
+        networks:
+            - auditnet
+    auditphp:
+        build: auditphp7.1-fpm
+        depends_on:
+            - auditdb
+        volumes:
+            - audit-symfony-bind-mount:/var/www/symfony
+            - audit-symfony-logs-bind-mount:/var/www/symfony/app/logs
+        networks:
+            - auditnet
+    auditnginx:
+        build: auditnginx
+        depends_on:
+            - auditphp
+        volumes:
+            - audit-symfony-bind-mount:/var/www/symfony
+            - audit-nginx-logs-bind-mount:/var/log/nginx
+        networks:
+            auditnet:
+                ipv4_address: ${AUDIT_IP_ADDRESS}
+
+networks:
+    lsnet:
+        ipam:
+            config:
+                - subnet: 172.18.0.0/24
+    auditnet:
+        ipam:
+            config:
+                - subnet: 172.19.0.0/24
+
 volumes:
     symfony-bind-mount:
         driver: local
@@ -70,3 +123,21 @@ volumes:
             o: bind,rw
             type: none
             device: ${DOCKER_SYMFONY_PATH}/doc
+    audit-symfony-bind-mount:
+        driver: local
+        driver_opts:
+            o: bind,rw
+            type: none
+            device: ${AUDIT_SYMFONY_APP_PATH}
+    audit-nginx-logs-bind-mount:
+        driver: local
+        driver_opts:
+            o: bind,rw
+            type: none
+            device: ${DOCKER_SYMFONY_PATH}/logs/auditnginx
+    audit-symfony-logs-bind-mount:
+        driver: local
+        driver_opts:
+            o: bind,rw
+            type: none
+            device: ${DOCKER_SYMFONY_PATH}/logs/auditphp

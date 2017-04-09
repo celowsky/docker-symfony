@@ -23,11 +23,10 @@ RUN pecl install xdebug \
     && echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.remote_port=9123" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini 
+    && echo "xdebug.remote_port=9124" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini 
 
 # Adds bash alias to easily run commands from host e.g. "docker run php sf d:d:d --force"
 RUN echo 'alias sf="php bin/console"' >> ~/.bashrc
-RUN echo 'alias sf3="php bin/console"' >> ~/.bashrc
 
 # Exposes php-fpm service on internal network
 EXPOSE 9000
