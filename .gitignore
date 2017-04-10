@@ -1,4 +1,4 @@
-logs/
+logs/**/*.log
 .data/
 .env
 doc/
