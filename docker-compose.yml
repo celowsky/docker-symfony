@@ -14,6 +14,7 @@ services:
             - lsnet
     php:
         build: php7.1-fpm
+        restart: always
         expose:
             - "9000"
             - "80"
@@ -35,6 +36,7 @@ services:
             - lsnet
     nginx:
         build: nginx
+        restart: always
         depends_on:
             - php
         ports:
@@ -48,6 +50,7 @@ services:
 
     mailhog:
         image: mailhog/mailhog
+        restart: always
         ports:
             - "1025:1025"
             - "8025:8025"
@@ -70,6 +73,7 @@ services:
             - auditnet
     auditphp:
         build: auditphp7.1-fpm
+        restart: always
         depends_on:
             - auditdb
         volumes:
@@ -79,6 +83,7 @@ services:
             - auditnet
     auditnginx:
         build: auditnginx
+        restart: always
         depends_on:
             - auditphp
         volumes:

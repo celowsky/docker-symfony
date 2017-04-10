@@ -5,6 +5,7 @@ LABEL author="Christian Elowsky <christian.elowsky@gmail.com>"
 
 RUN apt-get update && apt-get install -y \
     git \
+    mysql-client \
     unzip 
 
 # Install Composer
@@ -37,11 +38,17 @@ RUN usermod -u 1000 www-data
 
 # Copies composer.json from main project to container 
 COPY ./composer.json /var/www/symfony/composer.json
-WORKDIR /var/www/symfony
+
+# Copies script used to test if the Mysql container is ready
+COPY ./waitForAuditMysql.sh /tmp/
 
 # Makes sure environment is set so app/AppKernel.php does not fail
-# and makes sure cache directory permissions are very relaxed
-CMD export APP_ENV=dev \
+ENV APP_ENV dev
+
+# Makes sure Mysql is ready and then makes sure cache directory permissions are very relaxed
+RUN chmod +x /tmp/waitForAuditMysql.sh
+WORKDIR /var/www/symfony
+CMD /tmp/waitForAuditMysql.sh \
     && chmod -R 777 var/ \
     && composer install --no-scripts \
     && php bin/console d:m:m --no-interaction \
