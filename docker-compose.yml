@@ -24,7 +24,7 @@ services:
             - "legacyshield.dev:${APP_IP_ADDRESS}"
             - "www.legacyshield.dev:${APP_IP_ADDRESS}"
         volumes:
-            - symfony-bind-mount:/var/www
+            - symfony-bind-mount:/var/www/symfony
             - symfony-logs-bind-mount:/var/www/symfony/app/logs
         networks:
             - lsnet
@@ -42,7 +42,7 @@ services:
         ports:
             - "80:80"
         volumes:
-            - symfony-bind-mount:/var/www
+            - symfony-bind-mount:/var/www/symfony
             - nginx-logs-bind-mount:/var/log/nginx
         networks:
             lsnet:

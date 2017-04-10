@@ -49,7 +49,7 @@ ENV APP_ENV dev
 RUN chmod +x /tmp/waitForAuditMysql.sh
 WORKDIR /var/www/symfony
 CMD /tmp/waitForAuditMysql.sh \
-    && chmod -R 777 var/ \
+    && chmod -R 777 /var/www/symfony/ \
     && composer install --no-scripts \
     && php bin/console d:m:m --no-interaction \
     && php-fpm
